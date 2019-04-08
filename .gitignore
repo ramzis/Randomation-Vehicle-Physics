@@ -30,3 +30,9 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+
+\.idea/
+Assets/Plugins/
+Assets/Plugins\.meta
+
+ProjectSettings/EditorSettings\.asset
