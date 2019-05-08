@@ -86,7 +86,6 @@ namespace RVP
         [System.NonSerialized]
         public bool reversing;
 
-        public Wheel[] wheels;
         public HoverWheel[] hoverWheels;
         public WheelCheckGroup[] wheelGroups;
         bool wheelLoopDone = false;
@@ -360,14 +359,6 @@ namespace RVP
                         susAverage = i == 0 ? hoverWheels[i].hoverDistance : (susAverage + hoverWheels[i].hoverDistance) * 0.5f;
                     }
                 }
-                else
-                {
-                    for (int i = 0; i < wheels.Length; i++)
-                    {
-                        float newSusDist = wheels[i].transform.parent.GetComponent<Suspension>().suspensionDistance;
-                        susAverage = i == 0 ? newSusDist : (susAverage + newSusDist) * 0.5f;
-                    }
-                }
             }
 
             rb.centerOfMass = centerOfMassOffset + new Vector3(0, -susAverage, 0);
@@ -390,22 +381,6 @@ namespace RVP
                     }
 
                     if (hoverWheels[i].grounded)
-                    {
-                        groundedWheels++;
-                    }
-                }
-            }
-            else
-            {
-                for (int i = 0; i < wheels.Length; i++)
-                {
-                    if (wheels[i].grounded)
-                    {
-                        wheelContactsVelocity = i == 0 ? wheels[i].contactVelocity : (wheelContactsVelocity + wheels[i].contactVelocity) * 0.5f;
-                        wheelNormalAverage = i == 0 ? wheels[i].contactPoint.normal : (wheelNormalAverage + wheels[i].contactPoint.normal).normalized;
-                    }
-
-                    if (wheels[i].grounded)
                     {
                         groundedWheels++;
                     }
@@ -510,16 +485,10 @@ namespace RVP
     [System.Serializable]
     public class WheelCheckGroup
     {
-        public Wheel[] wheels;
         public HoverWheel[] hoverWheels;
 
         public void Activate()
         {
-            foreach (Wheel curWheel in wheels)
-            {
-                curWheel.getContact = true;
-            }
-
             foreach (HoverWheel curHover in hoverWheels)
             {
                 curHover.getContact = true;
@@ -528,11 +497,6 @@ namespace RVP
 
         public void Deactivate()
         {
-            foreach (Wheel curWheel in wheels)
-            {
-                curWheel.getContact = false;
-            }
-
             foreach (HoverWheel curHover in hoverWheels)
             {
                 curHover.getContact = false;

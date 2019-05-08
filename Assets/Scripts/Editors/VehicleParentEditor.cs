@@ -56,29 +56,6 @@ namespace RVP
                             }
                         }
                     }
-                    else
-                    {
-                        foreach (Wheel curWheel in targetScript.wheels)
-                        {
-                            bool wheelfound = false;
-                            foreach (WheelCheckGroup curGroup in targetScript.wheelGroups)
-                            {
-                                foreach (Wheel curWheelInstance in curGroup.wheels)
-                                {
-                                    if (curWheel == curWheelInstance)
-                                    {
-                                        wheelfound = true;
-                                    }
-                                }
-                            }
-
-                            if (!wheelfound)
-                            {
-                                wheelMissing = true;
-                                break;
-                            }
-                        }
-                    }
                 }
             }
 
@@ -110,10 +87,6 @@ namespace RVP
                             if (curTarget.hover)
                             {
                                 curTarget.hoverWheels = curTarget.transform.GetComponentsInChildren<HoverWheel>();
-                            }
-                            else
-                            {
-                                curTarget.wheels = curTarget.transform.GetComponentsInChildren<Wheel>();
                             }
                         }
                     }

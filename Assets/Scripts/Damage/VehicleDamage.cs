@@ -234,7 +234,6 @@ namespace RVP
             float vertDist;
             float distClamp;
             DetachablePart detachedPart;
-            Suspension damagedSus;
 
             //Get mass factor for multiplying damage
             if (useContactPoint)
@@ -261,13 +260,6 @@ namespace RVP
                 if (damagedMotor)
                 {
                     damagedMotor.health -= damagePartFactor * (1 - damagedMotor.strength);
-                }
-
-                //Damage transmissions
-                Transmission damagedTransmission = curDamagePart.GetComponent<Transmission>();
-                if (damagedTransmission)
-                {
-                    damagedTransmission.health -= damagePartFactor * (1 - damagedTransmission.strength);
                 }
             }
 
@@ -396,39 +388,6 @@ namespace RVP
                             }
                         }
 
-                        //Damage suspensions and wheels
-                        damagedSus = curDisplacePart.GetComponent<Suspension>();
-                        if (damagedSus)
-                        {
-                            if ((!damagedSus.wheel.grounded && ignoreGroundedWheels) || !ignoreGroundedWheels)
-                            {
-                                curDisplacePart.RotateAround(damagedSus.tr.TransformPoint(damagedSus.damagePivot), Vector3.ProjectOnPlane(damagePoint - curDisplacePart.position, -translation.normalized), clampedColMag * surfaceDot * distClamp * 20 * massFactor);
-
-                                damagedSus.wheel.damage += clampedColMag * surfaceDot * distClamp * 10 * massFactor;
-
-                                if (clampedColMag * surfaceDot * distClamp * 10 * massFactor > damagedSus.jamForce)
-                                {
-                                    damagedSus.jammed = true;
-                                }
-
-                                if (clampedColMag * surfaceDot * distClamp * 10 * massFactor > damagedSus.wheel.detachForce)
-                                {
-                                    damagedSus.wheel.Detach();
-                                }
-
-                                foreach (SuspensionPart curPart in damagedSus.movingParts)
-                                {
-                                    if (curPart.connectObj && !curPart.isHub && !curPart.solidAxle)
-                                    {
-                                        if (!curPart.connectObj.GetComponent<SuspensionPart>())
-                                        {
-                                            curPart.connectPoint += curPart.connectObj.InverseTransformDirection(clampedTranslation * surfaceDot * Mathf.Min(clampedColMag * 0.01f, distClamp) * massFactor);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
                         //Damage hover wheels
                         HoverWheel damagedHoverWheel = curDisplacePart.GetComponent<HoverWheel>();
                         if (damagedHoverWheel)
@@ -490,11 +449,6 @@ namespace RVP
                 {
                     damageParts[i].GetComponent<Motor>().health = 1;
                 }
-
-                if (damageParts[i].GetComponent<Transmission>())
-                {
-                    damageParts[i].GetComponent<Transmission>().health = 1;
-                }
             }
 
             //Restore deformed meshes
@@ -540,7 +494,6 @@ namespace RVP
             }
 
             //Fix displaced parts
-            Suspension fixedSus;
             Transform curDisplacePart;
             for (int i = 0; i < displaceParts.Length; i++)
             {
@@ -555,32 +508,6 @@ namespace RVP
                 {
                     curDisplacePart.parent.GetComponent<DetachablePart>().Reattach();
                 }
-
-                fixedSus = curDisplacePart.GetComponent<Suspension>();
-                if (fixedSus)
-                {
-                    curDisplacePart.localRotation = fixedSus.initialRotation;
-                    fixedSus.jammed = false;
-
-                    foreach (SuspensionPart curPart in fixedSus.movingParts)
-                    {
-                        if (curPart.connectObj && !curPart.isHub && !curPart.solidAxle)
-                        {
-                            if (!curPart.connectObj.GetComponent<SuspensionPart>())
-                            {
-                                curPart.connectPoint = curPart.initialConnectPoint;
-                            }
-                        }
-                    }
-                }
-            }
-
-            //Fix wheels
-            foreach (Wheel curWheel in vp.wheels)
-            {
-                curWheel.Reattach();
-                curWheel.FixTire();
-                curWheel.damage = 0;
             }
 
             //Fix hover wheels
